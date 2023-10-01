@@ -25,6 +25,9 @@ container_client = blob_service_client.get_container_client(container_name)
 
 @app.post("/api/start-recording", status_code=201)
 async def create_video_file(file_type: str):
+    """
+    Creates a new video file in the blob storage
+    """
     type = file_type
     id = uuid4().hex
 
@@ -48,10 +51,16 @@ async def create_video_file(file_type: str):
         print(e)
         raise HTTPException(401, "Could not create file")
     
-    return id
+    return { "message": "Video file created successfully",
+            "file_id": id 
+            }
 
 @app.post("/api/collect-video-data", status_code = 201)
 async def collect_video_data(data: VideoData):
+     """
+     Collects the video data in chunks(blobs) from the extension and appends it to the video file in blob storage
+
+     """
 
      blob = base64.b64decode(data.blob)
 
@@ -70,11 +79,16 @@ async def collect_video_data(data: VideoData):
          print(e)
          raise HTTPException(401, "Could not write to file")
       
-     return {"message" : "Successful"}
+     return {"message" : "Successful",
+             "file_id": data.id
+             }
      
 
 @app.post("/api/finalise-video", status_code = 201)
 async def finalise_video(file_id: str):
+    """
+    Returns the url to the video file
+    """
     
     try:
         blob_client = container_client.get_blob_client(file_id)
