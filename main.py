@@ -5,9 +5,12 @@ from fastapi import APIRouter, FastAPI, HTTPException, UploadFile
 from azure.storage.blob import BlobServiceClient, ContentSettings
 from azure.core.exceptions import ResourceNotFoundError 
 from typing import List
-import uvicorn, base64
+import uvicorn, base64, whisper
 
 from schemas import VideoData
+
+model = whisper.load_model('base')
+option = whisper.DecodingOptions(fp16=False)
 
 app = FastAPI()
 
@@ -82,6 +85,11 @@ async def finalise_video(file_id: str):
 
         # properties = blob_client.get_blob_properties()
         # pprint(properties)
+        with open(f"videos/{file_id}", "wb") as file:
+            file.write(blob_client.download_blob().readall())
+
+        video_transcription = model.transcribe(f"videos/{file_id}")
+        print(video_transcription['text'])
 
     except Exception as e:
         print(e)
