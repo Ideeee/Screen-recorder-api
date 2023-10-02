@@ -98,7 +98,8 @@ async def finalise_video(file_id: str):
     return {
             'message':'Video recording successful',
             'url': url,
-            'file_id': file_id
+            'file_id': file_id,
+            'video_transcription': video_transcription['text']
            }
 
 
