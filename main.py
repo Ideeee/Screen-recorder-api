@@ -24,9 +24,10 @@ container_client = blob_service_client.get_container_client(container_name)
 
 
 @app.post("/api/start-recording", status_code=201)
-async def create_video_file(file_type: str):
+async def create_video_file(file_type: str = 'video/mp4'):
     """
-    Creates a new video file in the blob storage
+    This endpoint creates a new empty video file in the blob storage and returns the id of the created file.\n
+    It takes in an optional file type parameter which defaults to mp4
     """
     type = file_type
     id = uuid4().hex
@@ -58,7 +59,8 @@ async def create_video_file(file_type: str):
 @app.post("/api/collect-video-data", status_code = 201)
 async def collect_video_data(data: VideoData):
      """
-     Collects the video data in chunks(blobs) from the extension and appends it to the video file in blob storage
+     This endpoint collects the video data in chunks(blobs) from the extension and appends it to the empty video file in the blob storage.\n
+     It takes in a VideoData object which contains the blob and the id of the file to be appended to.\n
 
      """
 
@@ -84,10 +86,10 @@ async def collect_video_data(data: VideoData):
              }
      
 
-@app.post("/api/finalise-video", status_code = 201)
+@app.post("/api/finalise-video", status_code = 200)
 async def finalise_video(file_id: str):
     """
-    Returns the url to the video file
+    Returns the url that can be used to stream the video file
     """
     
     try:
