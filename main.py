@@ -1,8 +1,10 @@
 from pprint import pprint
 from uuid import uuid4
+import tasks
 from fastapi import APIRouter, FastAPI, HTTPException, UploadFile
 # from azure.storage.blob.aio import BlobServiceClient
 from azure.storage.blob import BlobServiceClient, ContentSettings
+from azure_client import container_client, blob_service_client
 from azure.core.exceptions import ResourceNotFoundError 
 from typing import List
 import uvicorn, base64, whisper
@@ -18,10 +20,10 @@ app = FastAPI()
 async def root():
     return{'message': 'Na who give up, mess up'}
 
-connect_str = "DefaultEndpointsProtocol=https;AccountName=chromextension;AccountKey=Kevp1GcMr3Rc8JfWRBWXXf9mV1sMEThEP9soX++nWtoePisftZWJVitEKaklwXaajhPFb3XrTcDH+AStTpPU9Q==;EndpointSuffix=core.windows.net"
-blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-container_name = "test"
-container_client = blob_service_client.get_container_client(container_name)
+# connect_str = "DefaultEndpointsProtocol=https;AccountName=chromextension;AccountKey=Kevp1GcMr3Rc8JfWRBWXXf9mV1sMEThEP9soX++nWtoePisftZWJVitEKaklwXaajhPFb3XrTcDH+AStTpPU9Q==;EndpointSuffix=core.windows.net"
+# blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+# container_name = "test"
+# container_client = blob_service_client.get_container_client(container_name)
 
 
 
@@ -85,11 +87,12 @@ async def finalise_video(file_id: str):
 
         # properties = blob_client.get_blob_properties()
         # pprint(properties)
-        with open(f"videos/{file_id}", "wb") as file:
-            file.write(blob_client.download_blob().readall())
+        # with open(f"videos/{file_id}", "wb") as file:
+        #     file.write(blob_client.download_blob().readall())
 
-        video_transcription = model.transcribe(f"videos/{file_id}")
-        print(video_transcription['text'])
+        # video_transcription = model.transcribe(f"videos/{file_id}")
+        # print(video_transcription['text'])
+        result = tasks.transcribe_video.delay(file_id)
 
     except Exception as e:
         print(e)
@@ -99,7 +102,8 @@ async def finalise_video(file_id: str):
             'message':'Video recording successful',
             'url': url,
             'file_id': file_id,
-            'video_transcription': video_transcription['text']
+            'result': result.id
+            # 'video_transcription': video_transcription['text']
            }
 
 

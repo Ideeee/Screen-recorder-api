@@ -3,3 +3,4 @@ azure_storage-blob==12.18.2
 fastapi==0.103.2
 pydantic==2.4.2
 uvicorn==0.22.0
+# gu nicorn
